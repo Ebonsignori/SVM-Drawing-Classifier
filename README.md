@@ -17,14 +17,19 @@ their mouse. Each point (oval) can be represented by its x, y Cartesian coordina
 - Create drawings
 - Label drawings
 - Get label of unlabeled drawing (Hopefully) 
+
 ![alt text](./documentation/images/demo_1_classify_x.PNG "X Drawing Classified as X")
 - View drawings and the number of points (features) used to make them
+
 ![alt text](./documentation/images/demo_view_drawing.PNG "View Drawings")
 - Save or load sessions of drawings and their corresponding labels
+
 ![alt text](./documentation/images/demo_session_options.PNG "Session Options")
 - Test performance of SVM classifier using different kernels and feature representations
+
 ![alt text](./documentation/images/demo_rbf_kernal.PNG "RBF Kernel Accuracy Test")
 - View graph of classifier separations in 2D space of rbf and linear kernels
+
 ![alt text](./documentation/images/four_corners_four_classes_plot.png "Separation Plot of Four Different Labels")
 
 
