@@ -40,31 +40,49 @@ def plot_contours(ax, clf, xx, yy, **params):
     return out
 
 
-def plot(x_in, y_in, labels):
+def plot(x_in, labels):
+    # Get one example for each label
+    distinct_labels = list(set(labels))
+    distinct_examples = []
+    for i in range(len(distinct_labels)):
+        distinct_examples.append(x_in[labels.index(distinct_labels[i])])
+
+    X = []
+    y = []
+    i = 0
+    for example in distinct_examples:
+        for cord in example:
+            X.append(cord)
+            y.append(labels[labels.index(distinct_labels[i])])
+        i += 1
+
+    # Convert list of labels to numbers
     numeric_labels = []
-    for attached_label in y_in:
-        i = 0
-        for label in labels:
+    i = 0
+    for attached_label in distinct_labels:
+        for label in y:
             if (attached_label == label):
                 numeric_labels.append(i)
-            i += 1
+        i += 1
 
-    X = np.array(x_in)
+    X = np.array(X)
     y = np.array(numeric_labels)
 
     # we create an instance of SVM and fit out data. We do not scale our
     # data since we want to plot the support vectors
     C = 1.0  # SVM regularization parameter
-    models = (svm.SVC(kernel='rbf', gamma=0.7, C=C),
-              svm.SVC(kernel='poly', degree=3, C=C))
+    models = (svm.SVC(kernel='linear', C=C),
+              svm.LinearSVC(C=C),
+              svm.SVC(kernel='rbf', gamma=0.7, C=C))
     models = (clf.fit(X, y) for clf in models)
 
     # title for the plots
-    titles = ('Using RBF kernel',
-              'Using polynomial (degree 3) kernel')
+    titles = ('SVC with linear kernel',
+              'LinearSVC (linear kernel)',
+              'SVC with RBF kernel')
 
     # Set-up 2x2 grid for plotting.
-    fig, sub = plt.subplots(2)
+    fig, sub = plt.subplots(3)
     plt.subplots_adjust(wspace=0.4, hspace=0.4)
 
     X0, X1 = X[:, 0], X[:, 1]

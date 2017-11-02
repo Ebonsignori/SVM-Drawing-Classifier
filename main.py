@@ -1,6 +1,6 @@
 import tkinter as tk  # For GUI
 from tkinter import filedialog
-import pickle  # For binary file persistance storage
+import pickle  # For binary file persistence storage
 import zipfile as zf  # For combining the binary files into one file
 import os
 from classifier import DrawingClassifier as dClf
@@ -12,7 +12,7 @@ class Application(tk.Frame):
         super().__init__(master, relief="raised", bd=2)
         self.master = master
 
-        # Initalize variables
+        # Initialize variables
         self.current_num_of_features = 0
         self.each_num_of_features = []
         self.num_of_drawings = 0
@@ -210,7 +210,7 @@ class Application(tk.Frame):
         cartesian_cords = self.drawing_cartesian_cords
 
         # Training requires the labelled exampels and the unlabelled drawing
-        classified_label = clf.ClassifyCaresianMethod(cartesian_cords, self.drawing_labels)
+        classified_label = clf.ClassifyCartesianMethod(cartesian_cords, self.drawing_labels)
         # Output label of drawing
         self.classify_results_text.set("Classifier claims drawing is: " + str(classified_label))
 
@@ -274,7 +274,7 @@ class Application(tk.Frame):
 
         else:
             if (sorted(list(kernel_type)) == sorted(list("poly"))):
-                self.classify_results_text.set("Polynomial kernel not supported for cordinate method")
+                self.classify_results_text.set("Polynomial kernel not supported for coordinate method")
                 return
             if (self.drawing_cartesian_cords[-1] == []):
                     del self.drawing_cartesian_cords[-1]
@@ -285,9 +285,14 @@ class Application(tk.Frame):
 
     def SVMPLots(self):
         ''' Plots one example from each label, comparing poly and rbf kernels'''
-        plots.plot(self.drawing_cartesian_cords, self.drawing_cartesian_labels, self.labels)
+        # If there are two or more distinct labels, show plots for each
+        if (len(list(set(self.drawing_labels))) >= 2):
+            plots.plot(self.drawing_cartesian_cords, self.drawing_labels)
+        else:
+            self.classify_results_text.set("At least two distinct labels required for plotting")
 
     def viewDrawings(self):
+        ''' New window that lets users browse the drawings they have made and the number of features each contains '''
         self.view_window = tk.Toplevel()
         prompt_label = tk.Label(self.view_window, text="View Drawing")
         prompt_label.pack()
@@ -310,6 +315,7 @@ class Application(tk.Frame):
         self.view_canvas.pack()
 
     def viewDrawingsOnSelected(self, *args):
+        ''' Helper method for ViewDrawings. Populates empty canvas with the drawing when one is selected from dropdown'''
         if (sorted(list(self.drawings_text.get())) != sorted(list("No Drawings Available")) and
            sorted(list(self.drawings_text.get())) != sorted(list("Choose Drawing")) and
            sorted(list(self.drawings_text.get())) != sorted(list(""))):
@@ -408,6 +414,7 @@ class Application(tk.Frame):
         # Clear drawing
         self.canvas.delete("all")
 
+        # Reset object variables
         self.current_num_of_features = 0
         self.each_num_of_features = []
         self.num_of_drawings = 0
@@ -424,6 +431,7 @@ class Application(tk.Frame):
         self.classify_results_text.set("Session Reset.")
 
     def get_window_entry(self, entry, window):
+        ''' Helper method to grab the value when the window entry is selected '''
         self.session_name = entry
         window.destroy()
 
@@ -448,8 +456,9 @@ class Application(tk.Frame):
         menu_text.set(msg)
 
 if __name__ == "__main__":
+    # Declare GUI and begin loop
     root = tk.Tk()
     app = Application(master=root)
-    app.master.title("Drawing Classification")
+    app.master.title("SVM Drawing Classifier")
     app.master.maxsize(500, 700)
     app.mainloop()

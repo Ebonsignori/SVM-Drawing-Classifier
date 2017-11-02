@@ -2,34 +2,39 @@ import warnings
 import random  # For randomizing labelled examples in accuracy testing
 import math
 
+# Import sci-kit svm, but ignore deprecation messages regarding lack of numpy array use
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     from sklearn import svm  # For classification
 
 
-class DrawingClassifier():
+class DrawingClassifier:
     def __init__(self):
         self.X = list()
         self.y = list()
         self.min_features_length = 0
 
     def train(self, examples, labels, unlabelled):
+        """ Classifier train method for magnitudes as features """
+
+        # Find the minimum feature length and truncate (remove middle points) all examples to that length
         examples, unlabelled = self.normalizeFeatureLengths(examples, unlabelled)
 
+        # Check to make sure there are examples
         if (examples == 0):
             return
 
         # Create classifier with polynomial kernel
         self.clf = svm.SVC(kernel='poly')
 
-        # Get minimum features of trainign examples and new example
-        self.min_features_length = self.getMinFeaturesLen(examples, unlabelled)
+        # Get minimum features of training examples and new example
+        self.min_features_length = self.get_min_feature_len(examples, unlabelled)
 
-        if (self.min_features_length <= 3):
+        if self.min_features_length <= 2:
             print("Error not enough features in some drawing")
             return
 
-        # Represent datapoints as X and corresponding labels as y
+        # Represent data points as X and corresponding labels as y
         for points in examples:
             self.X.append(points[:self.min_features_length])
         self.y = labels
@@ -38,19 +43,19 @@ class DrawingClassifier():
         self.clf.fit(self.X, self.y)
 
     def predict(self, unlabelled):
-        if (self.min_features_length > 2):
+        if self.min_features_length >= 2:
             # Predict new drawing using the trained classifier
             return "Your drawing is " + str(self.clf.predict(unlabelled[:self.min_features_length])[0])
         else:
             return "Error not enough features in some drawing"
 
-    def getMinFeaturesLen(self, examples, unlabeled=None):
+    def get_min_feature_len(self, examples, unlabeled=None):
         # Find the minimum number of features in any example and new drawing
         min_features_length = len(examples[0])
         for i in range(len(examples)):
             if (len(examples[i]) < min_features_length):
                 min_features_length = len(examples[i])
-        # If new unlablled drawing is passed, include its length
+        # If new unlabeled drawing is passed, include its length
         if (unlabeled):
             new_drawing_length = len(unlabeled)
             if (new_drawing_length < min_features_length):
@@ -65,7 +70,7 @@ class DrawingClassifier():
 
         # Preprocess so that feature lengths are all the same
         examples = self.normalizeFeatureLengths(examples)
-        min_features_len = self.getMinFeaturesLen(examples)
+        min_features_len = self.get_min_feature_len(examples)
         X = list()
         for points in examples:
             X.append(points[:min_features_len])
@@ -147,7 +152,7 @@ class DrawingClassifier():
 
             return str((sum(correct_array) / len(correct_array)) * 100)
 
-    def ClassifyCaresianMethod(self, examples_in, labels):
+    def ClassifyCartesianMethod(self, examples_in, labels):
         unlabelled_drawing = examples_in[-1]
         examples = examples_in[:-1]
 
@@ -174,15 +179,8 @@ class DrawingClassifier():
         X = []
         y = labels
 
-        minimum_cords = 999999999
-        for example in examples:
-            if len(example) < minimum_cords:
-                minimum_cords = len(example)
-
-        i = 0
         for example in examples:
             X.append(example[0:])
-            i += 1
 
         # Create tuples of examples and their label and randomize their order
         labelled_examples = [(X[i], y[i]) for i in range(len(X))]
@@ -300,8 +298,10 @@ class DrawingClassifier():
 
         return highest[0]
 
-    def normalizeFeatureLengths(self, examples, unlabeled=None):
-        min_features_length = self.getMinFeaturesLen(examples)
+    def normalizeFeatureLengths(self, examples_in, unlabeled_in=None):
+        examples = examples_in
+        unlabeled = unlabeled_in
+        min_features_length = self.get_min_feature_len(examples)
 
         if (min_features_length <= 3):
             print("Error not enough features in some drawing")
